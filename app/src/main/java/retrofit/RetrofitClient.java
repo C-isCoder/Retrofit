@@ -1,7 +1,5 @@
 package retrofit;
 
-import android.app.Application;
-import android.content.Context;
 
 import com.sdbc.retrofit.APP;
 import com.sdbc.retrofit.AppToolUtil;
@@ -9,12 +7,16 @@ import com.sdbc.retrofit.BuildConfig;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
 import okhttp3.CacheControl;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
+import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -26,11 +28,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Created by iscod.
  * Time:2016/6/21-9:50.
  */
-public class RetrofitWrapper {
-    private static RetrofitWrapper instance;
+public class RetrofitClient {
+    private static RetrofitClient instance;
     private Retrofit retrofit;
 
-    private RetrofitWrapper() {
+    private RetrofitClient() {
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
@@ -40,7 +42,7 @@ public class RetrofitWrapper {
             HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
             loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             //设置 Debug Log 模式
-            builder.addInterceptor(loggingInterceptor);
+            //builder.addInterceptor(loggingInterceptor);
         }
 
         //网络请求缓存
@@ -112,16 +114,30 @@ public class RetrofitWrapper {
         //设置头
         builder.addInterceptor(headerInterceptor);
 
+        //设置cookie
+        CookieManager cookieManager = new CookieManager();
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+        builder.cookieJar(new JavaNetCookieJar(cookieManager));
+
+        //设置超时
+        builder.connectTimeout(15, TimeUnit.SECONDS);
+        builder.readTimeout(20, TimeUnit.SECONDS);
+        builder.writeTimeout(20, TimeUnit.SECONDS);
+        //错误重连
+        builder.retryOnConnectionFailure(true);
+
+        OkHttpClient client = builder.build();
         retrofit = new Retrofit.Builder()
                 .baseUrl(APIConstant.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(BcGsonConverterFactory.create())
+                .client(client)
                 .build();
     }
 
-    public static RetrofitWrapper getInstance() {
+    public static RetrofitClient getInstance() {
         if (instance == null) {
-            synchronized (RetrofitWrapper.class) {
-                instance = new RetrofitWrapper();
+            synchronized (RetrofitClient.class) {
+                instance = new RetrofitClient();
             }
         }
         return instance;

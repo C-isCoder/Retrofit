@@ -22,4 +22,8 @@ public interface DemoService {
     @FormUrlEncoded
     @POST("onebox/news/query")
     Call<BaseCallModel<List<NewsData>>> postService(@FieldMap Map<String, String> Parameters);
+
+    @FormUrlEncoded
+    @POST("user/login")
+    Call<BaseCallModel<LoginData>> toPostService(@FieldMap Map<String, String> Parameters);
 }
