@@ -21,6 +21,7 @@ import retrofit.APIConstant;
 import retrofit.BaseCallModel;
 import retrofit.BcCallback;
 import retrofit.DemoService;
+import retrofit.JuheCallModel;
 import retrofit.LoginData;
 import retrofit.NewsData;
 import retrofit.RetrofitClient;
@@ -41,43 +42,78 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
         DemoService go = RetrofitClient
                 .getInstance()
                 .create(DemoService.class);
-        Map<String, String> map = new HashMap<>();
-        map.put("q", "英雄联盟");
-        map.put("key", "d0efcc052db3181db11f0e35db1f56b4");
-        map.put("dtype", "json");
+        //百倡登录
+        Map<String, String> map1 = new HashMap<String, String>();
+        map1.put("userName", "17686616852");
+        map1.put("pwd", "123456");
+        map1.put("Integer", "android");
+        map1.put("isCompany", "0");
+        map1.put("appVersion", "1.0");
 
-//        Map<String, String> map1 = new HashMap<String, String>();
-//        map1.put("userName", "17686616852");
-//        map1.put("pwd", "123456");
-//        map1.put("Integer", "android");
-//        map1.put("isCompany", "0");
-//        map1.put("appVersion", "1.0");
-//        map1.put("action", "user/login");
-//        BcCallback<BaseCallModel<LoginData>> callback = go.toPostService(map1);
+        Map<String, Object> map2 = new HashMap<String, Object>();
+        map2.put("action", "user/login");
+        map2.put("params", map1);
 
-        //RxJava
-        Observable<BaseCallModel<List<NewsData>>> observable = go.rxGetNewsData(map);
-        observable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<BaseCallModel<List<NewsData>>>() {
-                    @Override
-                    public void onCompleted() {
-                        Log.d("CID", "执行成功");
-                    }
+        Call<BaseCallModel<LoginData>> loginCall = go.loginService(map2);
+        loginCall.enqueue(new Callback<BaseCallModel<LoginData>>() {
+            @Override
+            public void onResponse(Call<BaseCallModel<LoginData>> call,
+                                   Response<BaseCallModel<LoginData>> response) {
+                if (response.isSuccessful()) {
+                    tvContent.setText(response.body().msg);
+                }
+            }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        tvContent.setText(e.getMessage());
-                    }
+            @Override
+            public void onFailure(Call<BaseCallModel<LoginData>> call, Throwable t) {
+                tvContent.setText("错误：" + t.getMessage());
+            }
+        });
 
-                    @Override
-                    public void onNext(BaseCallModel<List<NewsData>> newsDatas) {
-                        tvContent.setText(newsDatas.result.toString());
-                    }
-                });
 
+//        Map<String, String> map = new HashMap<>();
+//        map.put("q", "英雄联盟");
+//        map.put("key", "d0efcc052db3181db11f0e35db1f56b4");
+//        map.put("dtype", "json");
+//
+//        //Retrofit
+//        Call<JuheCallModel<List<NewsData>>> callback = go.postService(map);
+//        callback.enqueue(new Callback<JuheCallModel<List<NewsData>>>() {
+//            @Override
+//            public void onResponse(Call<JuheCallModel<List<NewsData>>> call,
+//                                   Response<JuheCallModel<List<NewsData>>> response) {
+//
+//            }
+//
+//            @Override
+//            public void onFailure(Call<JuheCallModel<List<NewsData>>> call, Throwable t) {
+//
+//            }
+//        });
+//        //RxJava
+//        Observable<JuheCallModel<List<NewsData>>> observable = go.rxGetNewsData(map);
+//        observable.subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Subscriber<JuheCallModel<List<NewsData>>>() {
+//                    @Override
+//                    public void onCompleted() {
+//                        Log.d("CID", "执行成功");
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable e) {
+//                        tvContent.setText(e.getMessage());
+//                    }
+//
+//                    @Override
+//                    public void onNext(JuheCallModel<List<NewsData>> newsDatas) {
+//                        tvContent.setText(newsDatas.result.toString());
+//                    }
+//                });
+//
     }
 }

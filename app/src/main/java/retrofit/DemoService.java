@@ -23,13 +23,13 @@ public interface DemoService {
 //                                                    @Field("key") String key);
     @FormUrlEncoded
     @POST("onebox/news/query")
-    Call<BaseCallModel<List<NewsData>>> postService(@FieldMap Map<String, String> Parameters);
+    Call<JuheCallModel<List<NewsData>>> postService(@FieldMap Map<String, String> Parameters);
 
     @FormUrlEncoded
     @POST("user/login")
-    BcCallback<BaseCallModel<LoginData>> toPostService(@FieldMap Map<String, String> Parameters);
+    Call<BaseCallModel<LoginData>> loginService(@FieldMap Map<String, Object> Parameters);
 
     @FormUrlEncoded
     @POST("onebox/news/query")
-    Observable<BaseCallModel<List<NewsData>>> rxGetNewsData(@FieldMap Map<String, String> Parameters);
+    Observable<JuheCallModel<List<NewsData>>> rxGetNewsData(@FieldMap Map<String, String> Parameters);
 }

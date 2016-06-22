@@ -91,14 +91,14 @@ public class RetrofitClient {
                 HttpUrl modifiedUrl = originalRequest.url().newBuilder()
                         // Provide your custom parameter here
                         .addQueryParameter("platform", "android")
-                        .addQueryParameter("version", "1.0.0")
+                        //.addQueryParameter("version", "1.0.0")
                         .build();
                 request = originalRequest.newBuilder().url(modifiedUrl).build();
                 return chain.proceed(request);
             }
         };
         //设置公共参数
-        //builder.addInterceptor(addQueryParmeterInterceptor);
+        builder.addInterceptor(addQueryParmeterInterceptor);
 
         //网络请求头
         Interceptor headerInterceptor = new Interceptor() {
@@ -130,8 +130,9 @@ public class RetrofitClient {
         OkHttpClient client = builder.build();
         retrofit = new Retrofit.Builder()
                 .baseUrl(APIConstant.BASE_URL)
+                //.addConverterFactory(new BaseConverterFactory())
                 .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                //.addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .client(client)
                 .build();
     }

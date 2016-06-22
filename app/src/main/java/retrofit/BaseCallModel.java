@@ -6,13 +6,9 @@ package retrofit;
  */
 public class BaseCallModel<T> {
 
-//    public String msg;
-//    public BaseRes<T> res;
-//    public String state;
-
-    public String reason;
-    public T result;
-    public int error_code;
+    public String msg;
+    public BaseRes<T> res;
+    public String state;
 
     public static class BaseRes<T> {
         public int code;
