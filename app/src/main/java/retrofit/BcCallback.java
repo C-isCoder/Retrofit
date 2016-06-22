@@ -1,5 +1,9 @@
 package retrofit;
 
+import android.widget.Toast;
+
+import com.sdbc.retrofit.APP;
+
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 
@@ -14,27 +18,28 @@ import retrofit2.Response;
 public abstract class BcCallback<T extends BaseCallModel> implements Callback<T> {
     @Override
     public void onResponse(Call<T> call, Response<T> response) {
-        if (response.raw().code() == 200) {
-            onSuccess(response);
+//        if (response.raw().code() == 200) {
 //            try {
 //                int service_state = Integer.parseInt(response.body().state);
 //                if (service_state == 1) {
 //                    int res_state = response.body().res.code;
 //                    if (res_state == 4000) {
-//                        onSuccess(response);
+//                        onSuccess(call, response);
 //                    } else if (res_state == 3000) {
 //                        //onAutoLogin();
 //                    } else {
-//                        onError(response.body().msg);
+//                        onError(response.body().res.msg);
+//                        Toast.makeText(APP.getInstance(),
+//                                response.body().res.msg, Toast.LENGTH_SHORT).show();
 //                    }
 //                }
 //            } catch (Exception e) {
 //                onError("未知错误！！");
 //            }
-
-        } else {
-            onError("请求服务器异常");
-        }
+//
+//        } else {
+//            onError("请求服务器异常");
+//        }
     }
 
     @Override
@@ -49,7 +54,7 @@ public abstract class BcCallback<T extends BaseCallModel> implements Callback<T>
         onError(t.getMessage());
     }
 
-    public abstract void onSuccess(Response<T> response);
+    public abstract void onSuccess(Call<T> call, Response<T> response);
 
     public abstract void onError(String message);
 

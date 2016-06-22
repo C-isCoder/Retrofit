@@ -7,7 +7,9 @@ import java.util.Map;
 import retrofit2.Call;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
+import rx.Observable;
 
 /**
  * Created by iscod.
@@ -25,5 +27,9 @@ public interface DemoService {
 
     @FormUrlEncoded
     @POST("user/login")
-    Call<BaseCallModel<LoginData>> toPostService(@FieldMap Map<String, String> Parameters);
+    BcCallback<BaseCallModel<LoginData>> toPostService(@FieldMap Map<String, String> Parameters);
+
+    @FormUrlEncoded
+    @POST("onebox/news/query")
+    Observable<BaseCallModel<List<NewsData>>> rxGetNewsData(@FieldMap Map<String, String> Parameters);
 }
