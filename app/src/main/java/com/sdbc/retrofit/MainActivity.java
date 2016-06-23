@@ -46,7 +46,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
+        try {
+            Log.d("CID", "解密：" + AES.decrypt2Str("tiEPa7VkwLox/Uh2ybZg2Yx26A08ylTpstCt3mj43/izzU3CYZCqWDWw9vDZch8oA4hWLbordpPO" +
+                    "1SPo5sk+mtRz4tZCsgRl7JdYiOoPTZBlptMK6hnQIX7qI/EzH9dk", APIConstant.COMMENT_DECODE));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         DemoService go = RetrofitClient
                 .getInstance()
                 .create(DemoService.class);
