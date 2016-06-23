@@ -3,14 +3,25 @@ package retrofit;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonWriter;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import okio.Buffer;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 
@@ -18,11 +29,27 @@ import retrofit2.Retrofit;
  * Created by iscod on 2016/6/22.
  */
 public class BaseConverterFactory extends Converter.Factory {
+    private final Gson gson;
+
+    public static BaseConverterFactory create() {
+        return create(new Gson());
+    }
+
+    public static BaseConverterFactory create(Gson gson) {
+        return new BaseConverterFactory(gson);
+    }
+
+    private BaseConverterFactory(Gson gson) {
+        if (gson == null) throw new NullPointerException("gson == null");
+        this.gson = gson;
+    }
+
     @Override
     public Converter<ResponseBody, ?> responseBodyConverter(Type type,
                                                             Annotation[] annotations,
                                                             Retrofit retrofit) {
-        return new BaseResponseBodyConverter(type);
+        TypeAdapter<?> adapter = gson.getAdapter(TypeToken.get(type));
+        return new BaseResponseBodyConverter<>(adapter);
     }
 
     @Override
@@ -30,13 +57,19 @@ public class BaseConverterFactory extends Converter.Factory {
                                                           Annotation[] parameterAnnotations,
                                                           Annotation[] methodAnnotations,
                                                           Retrofit retrofit) {
-        return new BaseRequestBodyConverter<>();
+        TypeAdapter<?> adapter = gson.getAdapter(TypeToken.get(type));
+        return new BaseRequestBodyConverter<>(adapter);
     }
 
 
     public class BaseRequestBodyConverter<T> implements Converter<T, RequestBody> {
 
-        private Gson gson = new Gson();
+        private TypeAdapter<T> adapter;
+        private Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
+
+        public BaseRequestBodyConverter(TypeAdapter<T> adapter) {
+            this.adapter = adapter;
+        }
 
         @Override
         public RequestBody convert(T value) throws IOException {
@@ -53,26 +86,26 @@ public class BaseConverterFactory extends Converter.Factory {
         }
     }
 
+
     public class BaseResponseBodyConverter<T> implements Converter<ResponseBody, T> {
+        private final TypeAdapter<T> adapter;
 
-        private Type type;
-        Gson gson = new Gson();
-
-        public BaseResponseBodyConverter(Type type) {
-            this.type = type;
+        public BaseResponseBodyConverter(TypeAdapter<T> adapter) {
+            this.adapter = adapter;
         }
 
         @Override
         public T convert(ResponseBody response) throws IOException {
-            String result = response.toString();
+            String result = response.string();
+            //解密
             try {
-                //解密
                 result = AES.decrypt2Str(result, APIConstant.COMMENT_DECODE);
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                response.close();
             }
-            T data = gson.fromJson(result, type);
-            return data;
+            return adapter.fromJson(result);
         }
     }
 

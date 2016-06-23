@@ -37,14 +37,10 @@ public class RetrofitClient {
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
-        //网络请求调试日志
-        if (BuildConfig.DEBUG) {
-            // Log信息拦截器
-            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-            //设置 Debug Log 模式
-            //builder.addInterceptor(loggingInterceptor);
-        }
+        // Log信息拦截器
+        HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+        loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        builder.addInterceptor(loggingInterceptor);
 
         //网络请求缓存
         File cacheFile = new File(APP.getInstance().getBaseContext().getExternalCacheDir(),
@@ -79,7 +75,7 @@ public class RetrofitClient {
             }
         };
         //设置缓存
-        builder.cache(cache).addInterceptor(cacheInterceptor);
+        //builder.cache(cache).addInterceptor(cacheInterceptor);
         //公共参数
         Interceptor addQueryParmeterInterceptor = new Interceptor() {
             @Override
@@ -98,7 +94,7 @@ public class RetrofitClient {
             }
         };
         //设置公共参数
-        builder.addInterceptor(addQueryParmeterInterceptor);
+        //builder.addInterceptor(addQueryParmeterInterceptor);
 
         //网络请求头
         Interceptor headerInterceptor = new Interceptor() {
@@ -113,7 +109,7 @@ public class RetrofitClient {
             }
         };
         //设置头
-        builder.addInterceptor(headerInterceptor);
+        //builder.addInterceptor(headerInterceptor);
 
         //设置cookie
         CookieManager cookieManager = new CookieManager();
@@ -130,8 +126,8 @@ public class RetrofitClient {
         OkHttpClient client = builder.build();
         retrofit = new Retrofit.Builder()
                 .baseUrl(APIConstant.BASE_URL)
-                //.addConverterFactory(new BaseConverterFactory())
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(BaseConverterFactory.create())
+                //.addConverterFactory(GsonConverterFactory.create())
                 //.addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .client(client)
                 .build();

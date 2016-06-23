@@ -15,7 +15,10 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.MediaType;
 import okhttp3.Request;
+import okhttp3.RequestBody;
+import okio.BufferedSink;
 import retrofit.AES;
 import retrofit.APIConstant;
 import retrofit.BaseCallModel;
@@ -57,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
         Map<String, Object> map2 = new HashMap<String, Object>();
         map2.put("action", "user/login");
         map2.put("params", map1);
-
         Call<BaseCallModel<LoginData>> loginCall = go.loginService(map2);
         loginCall.enqueue(new Callback<BaseCallModel<LoginData>>() {
             @Override
