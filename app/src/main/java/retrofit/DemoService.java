@@ -4,6 +4,7 @@ package retrofit;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
@@ -26,9 +27,9 @@ public interface DemoService {
 
     @FormUrlEncoded
     @POST("user/login")
-    Call<BaseCallModel<LoginData>> loginService(@FieldMap Map<String, Object> Parameters);
+    Call<String> loginService(@FieldMap Map<String, Object> Parameters);
 
     @FormUrlEncoded
     @POST("onebox/news/query")
-    Observable<JuheCallModel<List<NewsData>>> rxGetNewsData(@FieldMap Map<String, String> Parameters);
+    Observable<String> rxGetNewsData(@FieldMap Map<String, String> Parameters);
 }

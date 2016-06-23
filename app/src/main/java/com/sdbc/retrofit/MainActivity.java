@@ -18,6 +18,7 @@ import butterknife.ButterKnife;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import okio.BufferedSink;
 import retrofit.AES;
 import retrofit.APIConstant;
@@ -51,38 +52,38 @@ public class MainActivity extends AppCompatActivity {
                 .create(DemoService.class);
         //百倡登录
         Map<String, String> map1 = new HashMap<String, String>();
-        map1.put("userName", "17686616852");
-        map1.put("pwd", "123456");
-        map1.put("Integer", "android");
-        map1.put("isCompany", "0");
-        map1.put("appVersion", "1.0");
-
+//        map1.put("userName", "17686616852");
+//        map1.put("pwd", "123456");
+//        map1.put("Integer", "android");
+//        map1.put("isCompany", "0");
+//        map1.put("appVersion", "1.0");
+//
         Map<String, Object> map2 = new HashMap<String, Object>();
-        map2.put("action", "user/login");
-        map2.put("params", map1);
-        Call<BaseCallModel<LoginData>> loginCall = go.loginService(map2);
-        loginCall.enqueue(new Callback<BaseCallModel<LoginData>>() {
+//        map2.put("action", "user/login");
+//        map2.put("params", map1);
+        Call<String> loginCall = go.loginService(map2);
+        loginCall.enqueue(new Callback<String>() {
             @Override
-            public void onResponse(Call<BaseCallModel<LoginData>> call,
-                                   Response<BaseCallModel<LoginData>> response) {
+            public void onResponse(Call<String> call,
+                                   Response<String> response) {
                 if (response.isSuccessful()) {
-                    tvContent.setText(response.body().msg);
+                    tvContent.setText(response.body());
                 }
             }
 
             @Override
-            public void onFailure(Call<BaseCallModel<LoginData>> call, Throwable t) {
+            public void onFailure(Call<String> call, Throwable t) {
                 tvContent.setText("错误：" + t.getMessage());
             }
         });
 
 
-//        Map<String, String> map = new HashMap<>();
-//        map.put("q", "英雄联盟");
-//        map.put("key", "d0efcc052db3181db11f0e35db1f56b4");
-//        map.put("dtype", "json");
-//
-//        //Retrofit
+        Map<String, String> map = new HashMap<>();
+        map.put("q", "英雄联盟");
+        map.put("key", "d0efcc052db3181db11f0e35db1f56b4");
+        map.put("dtype", "json");
+
+        //Retrofit
 //        Call<JuheCallModel<List<NewsData>>> callback = go.postService(map);
 //        callback.enqueue(new Callback<JuheCallModel<List<NewsData>>>() {
 //            @Override
@@ -96,11 +97,11 @@ public class MainActivity extends AppCompatActivity {
 //
 //            }
 //        });
-//        //RxJava
-//        Observable<JuheCallModel<List<NewsData>>> observable = go.rxGetNewsData(map);
+        //RxJava
+//        Observable<String> observable = go.rxGetNewsData(map);
 //        observable.subscribeOn(Schedulers.io())
 //                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Subscriber<JuheCallModel<List<NewsData>>>() {
+//                .subscribe(new Subscriber<String>() {
 //                    @Override
 //                    public void onCompleted() {
 //                        Log.d("CID", "执行成功");
@@ -112,10 +113,10 @@ public class MainActivity extends AppCompatActivity {
 //                    }
 //
 //                    @Override
-//                    public void onNext(JuheCallModel<List<NewsData>> newsDatas) {
-//                        tvContent.setText(newsDatas.result.toString());
+//                    public void onNext(String newsDatas) {
+//                        tvContent.setText(newsDatas);
 //                    }
 //                });
-//
+
     }
 }

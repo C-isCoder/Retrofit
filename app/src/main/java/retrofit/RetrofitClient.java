@@ -1,6 +1,10 @@
 package retrofit;
 
 
+import android.util.Log;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.sdbc.retrofit.APP;
 import com.sdbc.retrofit.AppToolUtil;
 import com.sdbc.retrofit.BuildConfig;
@@ -9,10 +13,14 @@ import java.io.File;
 import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Cache;
 import okhttp3.CacheControl;
+import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -24,6 +32,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Created by iscod.
@@ -41,7 +50,6 @@ public class RetrofitClient {
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
         loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         builder.addInterceptor(loggingInterceptor);
-
         //网络请求缓存
         File cacheFile = new File(APP.getInstance().getBaseContext().getExternalCacheDir(),
                 APP.getInstance().getPackageName());
@@ -126,9 +134,10 @@ public class RetrofitClient {
         OkHttpClient client = builder.build();
         retrofit = new Retrofit.Builder()
                 .baseUrl(APIConstant.BASE_URL)
-                .addConverterFactory(BaseConverterFactory.create())
+                //.addConverterFactory(BaseConverterFactory.create())
+                .addConverterFactory(ScalarsConverterFactory.create())
                 //.addConverterFactory(GsonConverterFactory.create())
-                //.addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .client(client)
                 .build();
     }
