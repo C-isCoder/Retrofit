@@ -134,8 +134,8 @@ public class RetrofitClient {
         OkHttpClient client = builder.build();
         retrofit = new Retrofit.Builder()
                 .baseUrl(APIConstant.BASE_URL)
-                //.addConverterFactory(BaseConverterFactory.create())
-                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(BaseConverterFactory.create())
+                //.addConverterFactory(ScalarsConverterFactory.create())
                 //.addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .client(client)

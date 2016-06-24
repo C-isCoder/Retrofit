@@ -57,27 +57,28 @@ public class MainActivity extends AppCompatActivity {
                 .create(DemoService.class);
         //百倡登录
         Map<String, String> map1 = new HashMap<String, String>();
-//        map1.put("userName", "17686616852");
-//        map1.put("pwd", "123456");
-//        map1.put("Integer", "android");
-//        map1.put("isCompany", "0");
-//        map1.put("appVersion", "1.0");
-//
+        map1.put("userName", "17686616852");
+        map1.put("pwd", "123456");
+        map1.put("Integer", "android");
+        map1.put("isCompany", "0");
+        map1.put("appVersion", "1.0");
+
         Map<String, Object> map2 = new HashMap<String, Object>();
-//        map2.put("action", "user/login");
-//        map2.put("params", map1);
-        Call<String> loginCall = go.loginService(map2);
-        loginCall.enqueue(new Callback<String>() {
+        map2.put("action", "user/login");
+        map2.put("params", map1);
+        Call<BaseCallModel<LoginData>> loginCall = go.loginService(map2);
+        loginCall.enqueue(new Callback<BaseCallModel<LoginData>>() {
             @Override
-            public void onResponse(Call<String> call,
-                                   Response<String> response) {
+            public void onResponse(Call<BaseCallModel<LoginData>> call,
+                                   Response<BaseCallModel<LoginData>> response) {
                 if (response.isSuccessful()) {
-                    tvContent.setText(response.body());
+                    String responseBody = response.toString();
+                    tvContent.setText(responseBody);
                 }
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(Call<BaseCallModel<LoginData>> call, Throwable t) {
                 tvContent.setText("错误：" + t.getMessage());
             }
         });

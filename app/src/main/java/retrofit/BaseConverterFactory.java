@@ -11,7 +11,10 @@ import com.google.gson.stream.JsonWriter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
@@ -49,7 +52,7 @@ public class BaseConverterFactory extends Converter.Factory {
                                                             Annotation[] annotations,
                                                             Retrofit retrofit) {
         TypeAdapter<?> adapter = gson.getAdapter(TypeToken.get(type));
-        return new BaseResponseBodyConverter<>(adapter);
+        return new BaseResponseBodyConverter<>(gson, adapter);//响应
     }
 
     @Override
@@ -58,30 +61,29 @@ public class BaseConverterFactory extends Converter.Factory {
                                                           Annotation[] methodAnnotations,
                                                           Retrofit retrofit) {
         TypeAdapter<?> adapter = gson.getAdapter(TypeToken.get(type));
-        return new BaseRequestBodyConverter<>(adapter);
+        return new BaseRequestBodyConverter<>();//请求
     }
 
 
     public class BaseRequestBodyConverter<T> implements Converter<T, RequestBody> {
 
-        private TypeAdapter<T> adapter;
         private Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
 
-        public BaseRequestBodyConverter(TypeAdapter<T> adapter) {
-            this.adapter = adapter;
+        public BaseRequestBodyConverter() {
         }
 
         @Override
         public RequestBody convert(T value) throws IOException {
-            String request = gson.toJson(value);
-            Log.d("CID", "加密前：" + request);
+            String strValue = value.toString();
+            Log.i("CID", "request中传递的json数据：" + strValue);
             try {
                 //加密
-                request = AES.encrypt2Str(request, APIConstant.COMMENT_ENCRYP);
-                Log.d("CID", "加密后：" + request);
+                strValue = AES.encrypt2Str(strValue, APIConstant.COMMENT_ENCRYP);
+                Log.i("CID", "加密后：" + strValue);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            String request = gson.toJson(strValue);
             return RequestBody.create(MediaType.parse("application/json; charset=UTF-8"), request);
         }
     }
@@ -89,24 +91,59 @@ public class BaseConverterFactory extends Converter.Factory {
 
     public class BaseResponseBodyConverter<T> implements Converter<ResponseBody, T> {
         private final TypeAdapter<T> adapter;
+        private Gson gson;
 
-        public BaseResponseBodyConverter(TypeAdapter<T> adapter) {
+        public BaseResponseBodyConverter(Gson gson, TypeAdapter<T> adapter) {
             this.adapter = adapter;
+            this.gson = gson;
         }
 
         @Override
         public T convert(ResponseBody response) throws IOException {
-            String result = response.string();
-            //解密
+//            InputStream in = response.byteStream();
+            String strResponse = response.string();
+            //String strResult = strResponse.substring(1, strResponse.length() - 1);
+            String result = null;
             try {
-                result = AES.decrypt2Str(result, APIConstant.COMMENT_DECODE);
+                result = AES.decrypt2Str(strResponse, APIConstant.COMMENT_DECODE);
+                Log.i("CID", "解密的服务器数据：" + result);
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                response.close();
             }
-            return adapter.fromJson(result);
+            //解密
+//            try {
+//                result = AES.decrypt2Str(result, APIConstant.COMMENT_DECODE);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            } finally {
+//                response.close();
+//            }
+            //return adapter.fromJson(result);
+            return (T) result;
         }
     }
 
+    public static String getStringFromInputStream(InputStream is) {
+        if (is == null) {
+            return null;
+        }
+        BufferedReader br
+                = new BufferedReader(
+                new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+
+        String line;
+        try {
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            br.close();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
+        String str = sb.toString();
+        return str;
+
+    }
 }
