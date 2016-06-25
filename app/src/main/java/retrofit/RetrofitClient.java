@@ -25,10 +25,13 @@ import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.JavaNetCookieJar;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
+import okio.BufferedSink;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -45,6 +48,21 @@ public class RetrofitClient {
     private RetrofitClient() {
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        //网络请求头
+        Interceptor headerInterceptor = new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request originalRequest = chain.request();
+                Request.Builder requestBuilder = originalRequest.newBuilder()
+                        .header("User-Agent", "android")
+                        .addHeader("Content-Type", "application/json")
+                        .method(originalRequest.method(), originalRequest.body());
+                Request request = requestBuilder.build();
+                return chain.proceed(request);
+            }
+        };
+        //设置头
+        builder.addInterceptor(headerInterceptor);
 
         // Log信息拦截器
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
@@ -102,22 +120,8 @@ public class RetrofitClient {
             }
         };
         //设置公共参数
-        //builder.addInterceptor(addQueryParmeterInterceptor);
+        builder.addInterceptor(addQueryParmeterInterceptor);
 
-        //网络请求头
-        Interceptor headerInterceptor = new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request originalRequest = chain.request();
-                Request.Builder requestBuilder = originalRequest.newBuilder()
-                        .header("User-Agent", "android")
-                        .method(originalRequest.method(), originalRequest.body());
-                Request request = requestBuilder.build();
-                return chain.proceed(request);
-            }
-        };
-        //设置头
-        //builder.addInterceptor(headerInterceptor);
 
         //设置cookie
         CookieManager cookieManager = new CookieManager();
@@ -130,13 +134,12 @@ public class RetrofitClient {
         builder.writeTimeout(20, TimeUnit.SECONDS);
         //错误重连
         builder.retryOnConnectionFailure(true);
-
         OkHttpClient client = builder.build();
         retrofit = new Retrofit.Builder()
                 .baseUrl(APIConstant.BASE_URL)
-                .addConverterFactory(BaseConverterFactory.create())
+                //.addConverterFactory(BaseConverterFactory.create())
                 //.addConverterFactory(ScalarsConverterFactory.create())
-                //.addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .client(client)
                 .build();

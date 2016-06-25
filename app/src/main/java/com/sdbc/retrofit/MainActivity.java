@@ -8,6 +8,9 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -46,31 +49,36 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        try {
-            Log.d("CID", "解密：" + AES.decrypt2Str("tiEPa7VkwLox/Uh2ybZg2Yx26A08ylTpstCt3mj43/izzU3CYZCqWDWw9vDZch8oA4hWLbordpPO" +
-                    "1SPo5sk+mtRz4tZCsgRl7JdYiOoPTZBlptMK6hnQIX7qI/EzH9dk", APIConstant.COMMENT_DECODE));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         DemoService go = RetrofitClient
                 .getInstance()
                 .create(DemoService.class);
         //百倡登录
-        Map<String, String> map1 = new HashMap<String, String>();
-        map1.put("userName", "17686616852");
-        map1.put("pwd", "123456");
-        map1.put("Integer", "android");
-        map1.put("isCompany", "0");
-        map1.put("appVersion", "1.0");
-
-        Map<String, Object> map2 = new HashMap<String, Object>();
-        map2.put("action", "user/login");
-        map2.put("params", map1);
-        Call<BaseCallModel<LoginData>> loginCall = go.loginService(map2);
-        loginCall.enqueue(new Callback<BaseCallModel<LoginData>>() {
+//        Map<String, String> map1 = new HashMap<String, String>();
+//        map1.put("userName", "17686616852");
+//        map1.put("pwd", "123456");
+//        map1.put("Integer", "android");
+//        map1.put("isCompany", "0");
+//        map1.put("appVersion", "1.0");
+//
+//        Map<String, Object> map2 = new HashMap<String, Object>();
+//        map2.put("action", "user/login");
+//        map2.put("params", map1);
+        Map<String, String> map3 = new HashMap<>();
+        map3.put("name", "test");
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("action", "member/hello");
+            jsonObject.put("params", map3);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        String str = jsonObject.toString();
+        Log.d("CID", "转Json" + str);
+        Call<BaseCallModel<String>> loginCall = go.test(jsonObject);
+        loginCall.enqueue(new Callback<BaseCallModel<String>>() {
             @Override
-            public void onResponse(Call<BaseCallModel<LoginData>> call,
-                                   Response<BaseCallModel<LoginData>> response) {
+            public void onResponse(Call<BaseCallModel<String>> call,
+                                   Response<BaseCallModel<String>> response) {
                 if (response.isSuccessful()) {
                     String responseBody = response.toString();
                     tvContent.setText(responseBody);
@@ -78,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<BaseCallModel<LoginData>> call, Throwable t) {
+            public void onFailure(Call<BaseCallModel<String>> call, Throwable t) {
                 tvContent.setText("错误：" + t.getMessage());
             }
         });
