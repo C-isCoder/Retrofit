@@ -38,6 +38,8 @@ import retrofit2.Response;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -73,29 +75,43 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         String str = jsonObject.toString();
-        Log.d("CID", "转Json" + str);
-        Call<BaseCallModel<String>> loginCall = go.test(jsonObject);
-        loginCall.enqueue(new Callback<BaseCallModel<String>>() {
+        Log.d("CID", "加密前JSON：" + str);
+        String paras = "";
+        try {
+            paras = AES.encrypt2Str(str, APIConstant.COMMENT_ENCRYP);
+            Log.d("CID", "加密后：" + paras);
+            String en = AES.decrypt2Str(paras, APIConstant.COMMENT_ENCRYP);
+            Log.d("CID", "解密后：" + en);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Call<String> loginCall = go.test(paras);
+        loginCall.enqueue(new Callback<String>() {
             @Override
-            public void onResponse(Call<BaseCallModel<String>> call,
-                                   Response<BaseCallModel<String>> response) {
+            public void onResponse(Call<String> call,
+                                   Response<String> response) {
                 if (response.isSuccessful()) {
-                    String responseBody = response.toString();
-                    tvContent.setText(responseBody);
+                    String responseBody = response.body();
+                    try {
+                        String str = AES.decrypt2Str(responseBody, APIConstant.COMMENT_DECODE);
+                        Log.d("CID", "解密后：" + str);
+                        JSONObject json = new JSONObject(str);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
             @Override
-            public void onFailure(Call<BaseCallModel<String>> call, Throwable t) {
+            public void onFailure(Call<String> call, Throwable t) {
                 tvContent.setText("错误：" + t.getMessage());
             }
         });
-
-
-        Map<String, String> map = new HashMap<>();
-        map.put("q", "英雄联盟");
-        map.put("key", "d0efcc052db3181db11f0e35db1f56b4");
-        map.put("dtype", "json");
+//        Map<String, String> map = new HashMap<>();
+//        map.put("q", "英雄联盟");
+//        map.put("key", "d0efcc052db3181db11f0e35db1f56b4");
+//        map.put("dtype", "json");
 
         //Retrofit
 //        Call<JuheCallModel<List<NewsData>>> callback = go.postService(map);

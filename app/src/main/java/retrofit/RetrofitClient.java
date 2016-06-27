@@ -55,7 +55,7 @@ public class RetrofitClient {
                 Request originalRequest = chain.request();
                 Request.Builder requestBuilder = originalRequest.newBuilder()
                         .header("User-Agent", "android")
-                        .addHeader("Content-Type", "application/json")
+                        .header("Content-Type", "application/json")
                         .method(originalRequest.method(), originalRequest.body());
                 Request request = requestBuilder.build();
                 return chain.proceed(request);
@@ -87,14 +87,12 @@ public class RetrofitClient {
                     //有网络时 设置缓存超时时间0个小时
                     response.newBuilder()
                             .header("Cache-Control", "public,max-age=" + maxAge)
-                            .removeHeader("")
                             .build();
                 } else {
                     // 无网络时 设置超时为4周
                     int maxStale = 60 * 60 * 24 * 28;
                     response.newBuilder()
                             .header("Cache-Control", "public, only-if-cached,max-stale=" + maxStale)
-                            .removeHeader("")
                             .build();
                 }
                 return response;
@@ -138,8 +136,8 @@ public class RetrofitClient {
         retrofit = new Retrofit.Builder()
                 .baseUrl(APIConstant.BASE_URL)
                 //.addConverterFactory(BaseConverterFactory.create())
-                //.addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(ScalarsConverterFactory.create())
+                //.addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .client(client)
                 .build();

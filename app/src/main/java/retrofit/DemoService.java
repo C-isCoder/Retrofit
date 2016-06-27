@@ -14,6 +14,7 @@ import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.Query;
 import rx.Observable;
 
 /**
@@ -38,8 +39,11 @@ public interface DemoService {
     @POST("onebox/news/query")
     Observable<String> rxGetNewsData(@FieldMap Map<String, String> Parameters);
 
-    @Headers("Content-Type: application/json")
     @FormUrlEncoded
     @POST("member/hello")
-    Call<BaseCallModel<String>> test(@Field("") JSONObject string);
+    Call<String> test(@Field("") String string);
+
+    @FormUrlEncoded
+    @POST("member/hello")
+    Observable<String> RxTest(@Field("") String string);
 }

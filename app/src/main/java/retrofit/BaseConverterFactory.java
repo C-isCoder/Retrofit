@@ -1,5 +1,6 @@
 package retrofit;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -103,47 +104,33 @@ public class BaseConverterFactory extends Converter.Factory {
 //            InputStream in = response.byteStream();
             String strResponse = response.string();
             //String strResult = strResponse.substring(1, strResponse.length() - 1);
-            String result = null;
+            String result = "";
             try {
                 result = AES.decrypt2Str(strResponse, APIConstant.COMMENT_DECODE);
                 Log.i("CID", "解密的服务器数据：" + result);
             } catch (Exception e) {
-                e.printStackTrace();
+
             }
-            //解密
-//            try {
-//                result = AES.decrypt2Str(result, APIConstant.COMMENT_DECODE);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            } finally {
-//                response.close();
+            return adapter.fromJson(result);
+        }
+    }
+
+//    public static <T> T fromJsonString(Class<T> cls, String jsonString) throws Exception {
+//        try {
+//            //data 直接 为String的时候 直接返回
+//            if (!TextUtils.isEmpty(jsonString) && !jsonString.startsWith("{") && !jsonString.startsWith("[")) {
+//                return (T) jsonString;
 //            }
-            //return adapter.fromJson(result);
-            return (T) result;
-        }
-    }
-
-    public static String getStringFromInputStream(InputStream is) {
-        if (is == null) {
-            return null;
-        }
-        BufferedReader br
-                = new BufferedReader(
-                new InputStreamReader(is));
-        StringBuilder sb = new StringBuilder();
-
-        String line;
-        try {
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-            br.close();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-
-        String str = sb.toString();
-        return str;
-
-    }
+//
+//            T entity = null;
+//            Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+//            entity = gson.fromJson(jsonString, cls);
+//            return entity;
+//        } catch (Exception e) {
+//            Log.d("ERROR", e == null ? "" : e.getMessage() + "");
+////            throw new MLParserException(String.format("%s(%s:%s)", e.getMessage(),
+////                    "解析的字符串为"
+////                    , jsonString));
+//        }
+//    }
 }
