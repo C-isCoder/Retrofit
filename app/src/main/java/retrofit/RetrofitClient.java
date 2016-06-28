@@ -136,8 +136,8 @@ public class RetrofitClient {
         retrofit = new Retrofit.Builder()
                 .baseUrl(APIConstant.BASE_URL)
                 //.addConverterFactory(BaseConverterFactory.create())
-                .addConverterFactory(ScalarsConverterFactory.create())
-                //.addConverterFactory(GsonConverterFactory.create())
+                //.addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .client(client)
                 .build();

@@ -111,7 +111,7 @@ public class BaseConverterFactory extends Converter.Factory {
             } catch (Exception e) {
 
             }
-            return adapter.fromJson(result);
+            return (T) adapter.toJson((T) result);
         }
     }
 
