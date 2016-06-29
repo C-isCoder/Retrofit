@@ -1,6 +1,7 @@
 package retrofit;
 
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -8,6 +9,9 @@ import com.google.gson.GsonBuilder;
 import com.sdbc.retrofit.APP;
 import com.sdbc.retrofit.AppToolUtil;
 import com.sdbc.retrofit.BuildConfig;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import okhttp3.Cache;
 import okhttp3.CacheControl;
@@ -30,6 +36,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import okio.BufferedSink;
 import retrofit2.Retrofit;
@@ -52,17 +59,76 @@ public class RetrofitClient {
         Interceptor headerInterceptor = new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
+                String enCode = "";
+                String deCode = "";
                 Request originalRequest = chain.request();
+                RequestBody str = originalRequest.body();
+                try {
+                    enCode = AES.encrypt2Str(str.toString(), APIConstant.COMMENT_ENCRYP);
+                    if (TextUtils.isEmpty(enCode)) {
+                        throw new HttpException("参数错误");
+                    }
+                    Log.i("Http请求：", "加密后的参数：" + replaceBlank(enCode));
+                } catch (Exception e) {
+                    throw new HttpException("参数错误");
+                }
+                RequestBody newBody = RequestBody.create(MediaType.parse("application/json; charset=UTF-8"), replaceBlank(enCode));
                 Request.Builder requestBuilder = originalRequest.newBuilder()
                         .header("User-Agent", "android")
                         .header("Content-Type", "application/json")
-                        .method(originalRequest.method(), originalRequest.body());
+                        .method(originalRequest.method(), newBody);
                 Request request = requestBuilder.build();
-                return chain.proceed(request);
+
+                Response response = chain.proceed(request);
+                String body = response.body().string();
+                Log.i("Http响应:", body);
+                MediaType type = response.body().contentType();
+                try {
+                    deCode = AES.decrypt2Str(body, APIConstant.COMMENT_DECODE);
+                    if (TextUtils.isEmpty(enCode)) {
+                        throw new HttpException("请求服务器异常");
+                    }
+                    Log.i("Http响应：", "解密后的参数：" + deCode);
+                } catch (Exception e) {
+                    throw new HttpException("请求服务器异常");
+                }
+                try {
+                    JSONObject jb = new JSONObject(deCode);
+                    // 服务器状态
+                    int service_state = jb.getInt("state");
+                    if (service_state == 1) {
+                        // 接口状态
+                        int ret_state = jb.getJSONObject("res").getInt("code");
+                        if (ret_state == 40000) {
+                            //data 为null  直接返回
+                            if (jb.getJSONObject("res").isNull("data")) {
+                                throw new HttpException("请求服务器异常");
+                            } else {
+                                String parames = jb.getJSONObject("res").toString();
+                                Log.i("Http响应：", "返回的Data实体：" + parames);
+                                ResponseBody responseBody = ResponseBody.create(type, parames);
+                                Response.Builder responseBuilder = response.newBuilder();
+                                responseBuilder.body(responseBody);
+                                Response newResponse = responseBuilder.build();
+                                return newResponse;
+                            }
+                        } else if (ret_state == 30000) {
+                            throw new HttpException(jb.getJSONObject("res").getString("msg"));
+                        } else {
+                            // 接口异常
+                            throw new HttpException(jb.getJSONObject("res").getString("msg"));
+                        }
+                    } else {
+                        // 服务器异常
+                        throw new HttpException(jb.getString("msg"));
+                    }
+                } catch (Exception e) {
+                    throw new HttpException(e.getMessage());
+                }
             }
         };
         //设置头
-        builder.addInterceptor(headerInterceptor);
+        builder.addNetworkInterceptor(headerInterceptor);
 
         // Log信息拦截器
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
@@ -118,7 +184,7 @@ public class RetrofitClient {
             }
         };
         //设置公共参数
-        builder.addInterceptor(addQueryParmeterInterceptor);
+        //builder.addInterceptor(addQueryParmeterInterceptor);
 
 
         //设置cookie
@@ -131,7 +197,7 @@ public class RetrofitClient {
         builder.readTimeout(20, TimeUnit.SECONDS);
         builder.writeTimeout(20, TimeUnit.SECONDS);
         //错误重连
-        builder.retryOnConnectionFailure(true);
+        builder.retryOnConnectionFailure(false);
         OkHttpClient client = builder.build();
         retrofit = new Retrofit.Builder()
                 .baseUrl(APIConstant.BASE_URL)
@@ -154,5 +220,21 @@ public class RetrofitClient {
 
     public <T> T create(Class<T> service) {
         return retrofit.create(service);
+    }
+
+    /**
+     * 去掉 /n 等字符
+     *
+     * @param str
+     * @return
+     */
+    public static String replaceBlank(String str) {
+        String dest = "";
+        if (str != null) {
+            Pattern p = Pattern.compile("\\s*|\t|\r|\n");
+            Matcher m = p.matcher(str);
+            dest = m.replaceAll("");
+        }
+        return dest;
     }
 }

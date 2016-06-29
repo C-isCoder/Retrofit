@@ -39,11 +39,13 @@ public interface DemoService {
     @POST("onebox/news/query")
     Observable<String> rxGetNewsData(@FieldMap Map<String, String> Parameters);
 
-    @FormUrlEncoded
-    @POST("member/hello")
-    Call<String> test(@Field("") String string);
+    @POST("pointhelpapi/mobile/")
+    Call<BaseCallModel<String>> test(@Body String string);
+
+    @POST("lollipop/mobile/")
+    Observable<String> test1(@Body String string);
 
     @FormUrlEncoded
     @POST("member/hello")
-    Observable<String> RxTest(@Field("") String string);
+    Observable<String> RxTest(@Body String string);
 }

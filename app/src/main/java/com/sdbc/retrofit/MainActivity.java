@@ -51,102 +51,58 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        initRequest();
+        try {
+            Log.d("解密：", AES.decrypt2Str("tiEPa7VkwLox/Uh2ybZg2Yx26A08ylTpstCt3mj43/izzU3CYZCqWDWw9vDZch8oA4hWLbordpPO" +
+                    "1SPo5sk+mtRz4tZCsgRl7JdYiOoPTZBlptMK6hnQIX7qI/EzH9dk", APIConstant.COMMENT_DECODE));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initRequest() {
         DemoService go = RetrofitClient
                 .getInstance()
                 .create(DemoService.class);
-        //百倡登录
-//        Map<String, String> map1 = new HashMap<String, String>();
-//        map1.put("userName", "17686616852");
-//        map1.put("pwd", "123456");
-//        map1.put("Integer", "android");
-//        map1.put("isCompany", "0");
-//        map1.put("appVersion", "1.0");
-//
-//        Map<String, Object> map2 = new HashMap<String, Object>();
-//        map2.put("action", "user/login");
-//        map2.put("params", map1);
         Map<String, String> map3 = new HashMap<>();
-        map3.put("name", "test");
+        map3.put("userName", "13205852585");
+        map3.put("userPwd", "45454");
+        map3.put("isCompany", "0");
+        map3.put("mobileInfo", "android");
+        map3.put("appVersion", "1");
+        map3.put("platform", "1");
+
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("action", "member/hello");
+            jsonObject.put("action", "user/login");
             jsonObject.put("params", map3);
         } catch (JSONException e) {
             e.printStackTrace();
         }
         String str = jsonObject.toString();
-        Log.d("CID", "加密前JSON：" + str);
-        String paras = "";
-        try {
-            paras = AES.encrypt2Str(str, APIConstant.COMMENT_ENCRYP);
-            Log.d("CID", "加密后：" + paras);
-            String en = AES.decrypt2Str(paras, APIConstant.COMMENT_ENCRYP);
-            Log.d("CID", "解密后：" + en);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        Call<String> loginCall = go.test(paras);
-        loginCall.enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(Call<String> call,
-                                   Response<String> response) {
-                if (response.isSuccessful()) {
-                    String responseBody = response.body();
-                    try {
-                        String str = AES.decrypt2Str(responseBody, APIConstant.COMMENT_DECODE);
-                        Log.d("CID", "解密后：" + str);
-                        JSONObject json = new JSONObject(str);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
 
-            @Override
-            public void onFailure(Call<String> call, Throwable t) {
-                tvContent.setText("错误：" + t.getMessage());
-            }
-        });
-//        Map<String, String> map = new HashMap<>();
-//        map.put("q", "英雄联盟");
-//        map.put("key", "d0efcc052db3181db11f0e35db1f56b4");
-//        map.put("dtype", "json");
-
-        //Retrofit
-//        Call<JuheCallModel<List<NewsData>>> callback = go.postService(map);
-//        callback.enqueue(new Callback<JuheCallModel<List<NewsData>>>() {
-//            @Override
-//            public void onResponse(Call<JuheCallModel<List<NewsData>>> call,
-//                                   Response<JuheCallModel<List<NewsData>>> response) {
-//
-//            }
-//
-//            @Override
-//            public void onFailure(Call<JuheCallModel<List<NewsData>>> call, Throwable t) {
-//
-//            }
-//        });
         //RxJava
-//        Observable<String> observable = go.rxGetNewsData(map);
-//        observable.subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Subscriber<String>() {
-//                    @Override
-//                    public void onCompleted() {
-//                        Log.d("CID", "执行成功");
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable e) {
-//                        tvContent.setText(e.getMessage());
-//                    }
-//
-//                    @Override
-//                    public void onNext(String newsDatas) {
-//                        tvContent.setText(newsDatas);
-//                    }
-//                });
+        Observable<String> observable = go.test1(str);
+        observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<String>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d("CID", "执行成功");
+                    }
 
+                    @Override
+                    public void onError(Throwable e) {
+                        tvContent.setText(e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(String body) {
+                        tvContent.setText(body);
+                    }
+                });
     }
+
+
 }

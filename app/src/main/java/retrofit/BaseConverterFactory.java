@@ -21,6 +21,8 @@ import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -84,11 +86,26 @@ public class BaseConverterFactory extends Converter.Factory {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            String request = gson.toJson(strValue);
+            String request = gson.toJson(replaceBlank(strValue));
             return RequestBody.create(MediaType.parse("application/json; charset=UTF-8"), request);
         }
     }
 
+    /**
+     * 去掉 /n 等字符
+     *
+     * @param str
+     * @return
+     */
+    public static String replaceBlank(String str) {
+        String dest = "";
+        if (str != null) {
+            Pattern p = Pattern.compile("\\s*|\t|\r|\n");
+            Matcher m = p.matcher(str);
+            dest = m.replaceAll("");
+        }
+        return dest;
+    }
 
     public class BaseResponseBodyConverter<T> implements Converter<ResponseBody, T> {
         private final TypeAdapter<T> adapter;
@@ -111,26 +128,9 @@ public class BaseConverterFactory extends Converter.Factory {
             } catch (Exception e) {
 
             }
+            Log.i("CID", "convert: " + (T) adapter.toJson((T) result));
             return (T) adapter.toJson((T) result);
         }
     }
 
-//    public static <T> T fromJsonString(Class<T> cls, String jsonString) throws Exception {
-//        try {
-//            //data 直接 为String的时候 直接返回
-//            if (!TextUtils.isEmpty(jsonString) && !jsonString.startsWith("{") && !jsonString.startsWith("[")) {
-//                return (T) jsonString;
-//            }
-//
-//            T entity = null;
-//            Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-//            entity = gson.fromJson(jsonString, cls);
-//            return entity;
-//        } catch (Exception e) {
-//            Log.d("ERROR", e == null ? "" : e.getMessage() + "");
-////            throw new MLParserException(String.format("%s(%s:%s)", e.getMessage(),
-////                    "解析的字符串为"
-////                    , jsonString));
-//        }
-//    }
 }
