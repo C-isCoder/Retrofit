@@ -78,53 +78,53 @@ public class RetrofitClient {
                         .header("Content-Type", "application/json")
                         .method(originalRequest.method(), newBody);
                 Request request = requestBuilder.build();
-                return chain.proceed(request);
-                //Response response = chain.proceed(request);
-//                String body = response.body().string();
-//                Log.i("Http响应:", body);
-//                MediaType type = response.body().contentType();
-//                try {
-//                    deCode = AES.decrypt2Str(body, APIConstant.COMMENT_DECODE);
-//                    if (TextUtils.isEmpty(enCode)) {
-//                        throw new HttpException("请求服务器异常");
-//                    }
-//                    Log.i("Http响应：", "解密后的参数：" + deCode);
-//                } catch (Exception e) {
-//                    throw new HttpException("请求服务器异常");
-//                }
-//                try {
-//                    JSONObject jb = new JSONObject(deCode);
-//                    // 服务器状态
-//                    int service_state = jb.getInt("state");
-//                    if (service_state == 1) {
-//                        // 接口状态
-//                        int ret_state = jb.getJSONObject("res").getInt("code");
-//                        if (ret_state == 40000) {
-//                            //data 为null  直接返回
-//                            if (jb.getJSONObject("res").isNull("data")) {
-//                                throw new HttpException("请求服务器异常");
-//                            } else {
-//                                String parames = jb.getJSONObject("res").toString();
-//                                Log.i("Http响应：", "返回的Data实体：" + parames);
-//                                ResponseBody responseBody = ResponseBody.create(type, parames);
-//                                Response.Builder responseBuilder = response.newBuilder();
-//                                responseBuilder.body(responseBody);
-//                                Response newResponse = responseBuilder.build();
-//                                return newResponse;
-//                            }
-//                        } else if (ret_state == 30000) {
-//                            throw new HttpException(jb.getJSONObject("res").getString("msg"));
-//                        } else {
-//                            // 接口异常
-//                            throw new HttpException(jb.getJSONObject("res").getString("msg"));
-//                        }
-//                    } else {
-//                        // 服务器异常
-//                        throw new HttpException(jb.getString("msg"));
-//                    }
-//                } catch (Exception e) {
-//                    throw new HttpException(e.getMessage());
-//                }
+                //return chain.proceed(request);
+                Response response = chain.proceed(request);
+                String body = response.body().string();
+                Log.i("Http响应:", body);
+                MediaType type = response.body().contentType();
+                try {
+                    deCode = AES.decrypt2Str(body, APIConstant.COMMENT_DECODE);
+                    if (TextUtils.isEmpty(enCode)) {
+                        throw new HttpException("请求服务器异常");
+                    }
+                    Log.i("Http响应：", "解密后的参数：" + deCode);
+                } catch (Exception e) {
+                    throw new HttpException("请求服务器异常");
+                }
+                try {
+                    JSONObject jb = new JSONObject(deCode);
+                    // 服务器状态
+                    int service_state = jb.getInt("state");
+                    if (service_state == 1) {
+                        // 接口状态
+                        int ret_state = jb.getJSONObject("res").getInt("code");
+                        if (ret_state == 40000) {
+                            //data 为null  直接返回
+                            if (jb.getJSONObject("res").isNull("data")) {
+                                throw new HttpException("请求服务器异常");
+                            } else {
+                                String parames = jb.getJSONObject("res").toString();
+                                Log.i("Http响应：", "返回的Data实体：" + parames);
+                                ResponseBody responseBody = ResponseBody.create(type, parames);
+                                Response.Builder responseBuilder = response.newBuilder();
+                                responseBuilder.body(responseBody);
+                                Response newResponse = responseBuilder.build();
+                                return newResponse;
+                            }
+                        } else if (ret_state == 30000) {
+                            throw new HttpException(jb.getJSONObject("res").getString("msg"));
+                        } else {
+                            // 接口异常
+                            throw new HttpException(jb.getJSONObject("res").getString("msg"));
+                        }
+                    } else {
+                        // 服务器异常
+                        throw new HttpException(jb.getString("msg"));
+                    }
+                } catch (Exception e) {
+                    throw new HttpException(e.getMessage());
+                }
             }
         };
         //设置头
@@ -193,7 +193,7 @@ public class RetrofitClient {
         builder.cookieJar(new JavaNetCookieJar(cookieManager));
 
         //设置超时
-        builder.connectTimeout(15, TimeUnit.SECONDS);
+        builder.connectTimeout(30, TimeUnit.SECONDS);
         builder.readTimeout(20, TimeUnit.SECONDS);
         builder.writeTimeout(20, TimeUnit.SECONDS);
         //错误重连
@@ -203,7 +203,7 @@ public class RetrofitClient {
                 .baseUrl(APIConstant.BASE_URL)
                 .addConverterFactory(BaseConverterFactory.create())
                 //.addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
+                //.addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .client(client)
                 .build();
