@@ -4,29 +4,21 @@ package retrofit;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.sdbc.retrofit.AES;
+import com.sdbc.retrofit.APIConstant;
 import com.sdbc.retrofit.APP;
 import com.sdbc.retrofit.AppToolUtil;
-import com.sdbc.retrofit.BuildConfig;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import okhttp3.Cache;
 import okhttp3.CacheControl;
-import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -36,13 +28,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
-import okio.BufferedSink;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 /**
  * Created by iscod.
@@ -166,26 +154,6 @@ public class RetrofitClient {
         };
         //设置缓存
         //builder.cache(cache).addInterceptor(cacheInterceptor);
-        //公共参数
-        Interceptor addQueryParmeterInterceptor = new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request originalRequest = chain.request();
-                Request request;
-                String method = originalRequest.method();
-                Headers headers = originalRequest.headers();
-                HttpUrl modifiedUrl = originalRequest.url().newBuilder()
-                        // Provide your custom parameter here
-                        .addQueryParameter("platform", "android")
-                        //.addQueryParameter("version", "1.0.0")
-                        .build();
-                request = originalRequest.newBuilder().url(modifiedUrl).build();
-                return chain.proceed(request);
-            }
-        };
-        //设置公共参数
-        //builder.addInterceptor(addQueryParmeterInterceptor);
-
 
         //设置cookie
         CookieManager cookieManager = new CookieManager();

@@ -10,13 +10,10 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import retrofit.AES;
-import retrofit.APIConstant;
 import retrofit.HttpService;
 import retrofit.HttpRequestParamsUtils;
 import retrofit.RetrofitClient;
 import retrofit.UserData;
-import retrofit2.Retrofit;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;

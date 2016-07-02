@@ -1,4 +1,4 @@
-package retrofit;
+package com.sdbc.retrofit;
 
 /**
  * Created by iscod.

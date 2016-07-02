@@ -17,10 +17,6 @@ import rx.Observable;
 public interface HttpService {
 
     @FormUrlEncoded
-    @POST("user/login")
-    Call<BaseCallModel<LoginData>> loginService(@FieldMap Map<String, Object> Parameters);
-
-    @FormUrlEncoded
     @POST("onebox/news/query")
     Observable<String> rxGetNewsData(@FieldMap Map<String, String> Parameters);
 
