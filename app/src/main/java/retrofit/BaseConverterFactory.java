@@ -79,23 +79,23 @@ public class BaseConverterFactory extends Converter.Factory {
         @Override
         public RequestBody convert(T value) throws IOException {
 
-            Buffer buffer = new Buffer();
-            Writer writer = new OutputStreamWriter(buffer.outputStream(), UTF_8);
-            JsonWriter jsonWriter = gson.newJsonWriter(writer);
-            adapter.write(jsonWriter, value);
-            jsonWriter.close();
-            return RequestBody.create(MEDIA_TYPE, buffer.readByteString());
-//            String strValue = value.toString();
-//            Log.i("CID", "request中传递的json数据：" + strValue);
-//            try {
-//                //加密
-//                strValue = AES.encrypt2Str(strValue, APIConstant.COMMENT_ENCRYP);
-//                Log.i("CID", "加密后：" + strValue);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//            String request = gson.toJson(replaceBlank(strValue));
-//            return RequestBody.create(MediaType.parse("application/json; charset=UTF-8"), request);
+//            Buffer buffer = new Buffer();
+//            Writer writer = new OutputStreamWriter(buffer.outputStream(), UTF_8);
+//            JsonWriter jsonWriter = gson.newJsonWriter(writer);
+//            adapter.write(jsonWriter, value);
+//            jsonWriter.close();
+//            return RequestBody.create(MEDIA_TYPE, buffer.readByteString());
+            String strValue = value.toString();
+            Log.i("CID", "request中传递的json数据：" + strValue);
+            try {
+                //加密
+                strValue = AES.encrypt2Str(strValue, APIConstant.COMMENT_ENCRYP);
+                Log.i("CID", "加密后：" + strValue);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            String request = gson.toJson(replaceBlank(strValue));
+            return RequestBody.create(MediaType.parse("application/json; charset=UTF-8"), request);
         }
     }
 

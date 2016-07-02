@@ -79,7 +79,7 @@ public class RetrofitClient {
                         .method(originalRequest.method(), newBody);
                 Request request = requestBuilder.build();
                 return chain.proceed(request);
-                //Response response = chain.proceed(request);
+//                Response response = chain.proceed(request);
 //                String body = response.body().string();
 //                Log.i("Http响应:", body);
 //                MediaType type = response.body().contentType();
@@ -125,10 +125,10 @@ public class RetrofitClient {
 //                } catch (Exception e) {
 //                    throw new HttpException(e.getMessage());
 //                }
-            }
+           }
         };
         //设置头
-        builder.addNetworkInterceptor(headerInterceptor);
+        //builder.addNetworkInterceptor(headerInterceptor);
 
         // Log信息拦截器
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
@@ -203,7 +203,7 @@ public class RetrofitClient {
                 .baseUrl(APIConstant.BASE_URL)
                 .addConverterFactory(BaseConverterFactory.create())
                 //.addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
+                //.addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
                 .client(client)
                 .build();

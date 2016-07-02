@@ -30,5 +30,6 @@ public interface HttpService {
     @POST("lollipop/mobile/")
     Observable<String> test1(@Body String string);
 
-
+    @POST("pointhelpapi/mobile/")
+    Observable<UserData> login(@Body String string);
 }
