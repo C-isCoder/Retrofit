@@ -10,48 +10,47 @@ import java.net.SocketTimeoutException;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import rx.Completable;
+import rx.Observable;
+import rx.Single;
+import rx.functions.Func1;
 
 /**
  * Created by iscod.
  * Time:2016/6/21-14:56.
  */
-public abstract class BcCallback<T extends BaseCallModel> implements Callback<T> {
-    @Override
-    public void onResponse(Call<T> call, Response<T> response) {
-        if (response.raw().code() == 200) {
-            try {
-                int service_state = Integer.parseInt(response.body().state);
-                if (service_state == 1) {
-                    int res_state = response.body().res.code;
-                    if (res_state == 4000) {
-                        onSuccess(call, response);
-                    } else if (res_state == 3000) {
-                        //onAutoLogin();
-                    } else {
-                        onError(response.body().res.msg);
-                        Toast.makeText(APP.getInstance(),
-                                response.body().res.msg, Toast.LENGTH_SHORT).show();
-                    }
-                }
-            } catch (Exception e) {
-                onError("未知错误！！");
-            }
+public abstract class BcCallback<T extends BaseCallModel> extends Observable<T> {
 
-        } else {
-            onError("请求服务器异常");
-        }
+    /**
+     * Creates an Observable with a Function to execute when it is subscribed to.
+     * <p>
+     * <em>Note:</em> Use {@link #create(OnSubscribe)} to create an Observable, instead of this constructor,
+     * unless you specifically have a need for inheritance.
+     *
+     * @param f {@link OnSubscribe} to be executed when {@link #subscribe(Subscriber)} is called
+     */
+    protected BcCallback(OnSubscribe<T> f) {
+        super(f);
     }
 
     @Override
-    public void onFailure(Call<T> call, Throwable t) {
-        if (t instanceof SocketTimeoutException) {
+    public <R> R extend(Func1<? super OnSubscribe<T>, ? extends R> conversion) {
+        return super.extend(conversion);
+    }
 
-        } else if (t instanceof ConnectException) {
+    @Override
+    public <R> Observable<R> compose(Transformer<? super T, ? extends R> transformer) {
+        return super.compose(transformer);
+    }
 
-        } else if (t instanceof RuntimeException) {
+    @Override
+    public Completable toCompletable() {
+        return super.toCompletable();
+    }
 
-        }
-        onError(t.getMessage());
+    @Override
+    public Single<T> toSingle() {
+        return super.toSingle();
     }
 
     public abstract void onSuccess(Call<T> call, Response<T> response);
