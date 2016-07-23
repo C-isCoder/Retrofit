@@ -7,12 +7,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonWriter;
 import com.sdbc.retrofit.AES;
 import com.sdbc.retrofit.APIConstant;
 
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
@@ -22,6 +25,7 @@ import java.util.regex.Pattern;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import okio.Buffer;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 
@@ -76,23 +80,16 @@ public class BaseConverterFactory extends Converter.Factory {
         @Override
         public RequestBody convert(T value) throws IOException {
 
-//            Buffer buffer = new Buffer();
-//            Writer writer = new OutputStreamWriter(buffer.outputStream(), UTF_8);
-//            JsonWriter jsonWriter = gson.newJsonWriter(writer);
-//            adapter.write(jsonWriter, value);
-//            jsonWriter.close();
-//            return RequestBody.create(MEDIA_TYPE, buffer.readByteString());
-            String strValue = value.toString();
-            Log.i("CID", "request中传递的json数据：" + strValue);
-            try {
-                //加密
-                strValue = AES.encrypt2Str(strValue, APIConstant.COMMENT_ENCRYP);
-                Log.i("CID", "加密后：" + strValue);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            String request = gson.toJson(replaceBlank(strValue));
-            return RequestBody.create(MediaType.parse("application/json; charset=UTF-8"), request);
+                        Buffer buffer = new Buffer();
+            Writer writer = new OutputStreamWriter(buffer.outputStream(), UTF_8);
+            JsonWriter jsonWriter = gson.newJsonWriter(writer);
+            adapter.write(jsonWriter, value);
+            jsonWriter.close();
+            return RequestBody.create(MEDIA_TYPE, buffer.readByteString());
+//            String strValue = value.toString();
+//            Log.i("CID", "request中传递的json数据：" + strValue);
+//            String request = gson.toJson(strValue);
+//            return RequestBody.create(MediaType.parse("application/json; charset=UTF-8"), request);
         }
     }
 
@@ -108,19 +105,12 @@ public class BaseConverterFactory extends Converter.Factory {
         @Override
         public T convert(ResponseBody response) throws IOException {
             String strResponse = response.string();
-            String deCode = "";
             Log.i("Http响应:", strResponse);
-            try {
-                deCode = AES.decrypt2Str(strResponse, APIConstant.COMMENT_DECODE);
-                if (TextUtils.isEmpty(deCode)) {
-                    throw new HttpException("请求服务器异常");
-                }
-                Log.i("Http响应：", "解密后的参数：" + deCode);
-            } catch (Exception e) {
+            if (TextUtils.isEmpty(strResponse)) {
                 throw new HttpException("请求服务器异常");
             }
             try {
-                JSONObject jb = new JSONObject(deCode);
+                JSONObject jb = new JSONObject(strResponse);
                 // 服务器状态
                 int service_state = jb.getInt("state");
                 if (service_state == 1) {
@@ -149,22 +139,6 @@ public class BaseConverterFactory extends Converter.Factory {
                 throw new HttpException(e.getMessage());
             }
         }
-    }
-
-    /**
-     * 去掉 /n 等字符
-     *
-     * @param str
-     * @return
-     */
-    public static String replaceBlank(String str) {
-        String dest = "";
-        if (str != null) {
-            Pattern p = Pattern.compile("\\s*|\t|\r|\n");
-            Matcher m = p.matcher(str);
-            dest = m.replaceAll("");
-        }
-        return dest;
     }
 
 }
