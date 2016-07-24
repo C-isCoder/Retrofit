@@ -28,7 +28,8 @@ public interface HttpService {
     Observable<String> rxGetNewsData(@FieldMap Map<String, String> Parameters);
 
     @POST("member/memberLogin")
-    @FormUrlEncoded
-    Observable<UserData> login(@Query("sign") String sign,
-                               @Field("mobile") String mobile, @Field("pwd") String pwd);
+    Observable<UserData> login(@Query("sign") String sign, @Body Map<String, String> Parameters);
+
+    @POST("village/findDoorsByBuild")
+    Observable<UserData> getDoors(@Query("sign") String sign, @Body Map<String, String> Parameters);
 }

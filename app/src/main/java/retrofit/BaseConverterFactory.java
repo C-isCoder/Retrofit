@@ -80,7 +80,7 @@ public class BaseConverterFactory extends Converter.Factory {
         @Override
         public RequestBody convert(T value) throws IOException {
 
-                        Buffer buffer = new Buffer();
+            Buffer buffer = new Buffer();
             Writer writer = new OutputStreamWriter(buffer.outputStream(), UTF_8);
             JsonWriter jsonWriter = gson.newJsonWriter(writer);
             adapter.write(jsonWriter, value);
@@ -88,8 +88,7 @@ public class BaseConverterFactory extends Converter.Factory {
             return RequestBody.create(MEDIA_TYPE, buffer.readByteString());
 //            String strValue = value.toString();
 //            Log.i("CID", "request中传递的json数据：" + strValue);
-//            String request = gson.toJson(strValue);
-//            return RequestBody.create(MediaType.parse("application/json; charset=UTF-8"), request);
+//            return RequestBody.create(MEDIA_TYPE, strValue);
         }
     }
 
@@ -121,9 +120,9 @@ public class BaseConverterFactory extends Converter.Factory {
                         if (jb.getJSONObject("res").isNull("data")) {
                             throw new HttpException("请求服务器异常");
                         } else {
-                            String parames = jb.getJSONObject("res").toString();
+                            String parames = jb.getJSONObject("res").getJSONObject("data").toString();
                             Log.i("Http响应：", "返回的Data实体：" + parames);
-                            return (T) adapter.toJson((T) parames);
+                            return adapter.fromJson(parames);
                         }
                     } else if (ret_state == 30000) {
                         throw new HttpException(jb.getJSONObject("res").getString("msg"));
@@ -137,6 +136,8 @@ public class BaseConverterFactory extends Converter.Factory {
                 }
             } catch (Exception e) {
                 throw new HttpException(e.getMessage());
+            } finally {
+                response.close();
             }
         }
     }

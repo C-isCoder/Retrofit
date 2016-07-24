@@ -8,6 +8,7 @@ import android.app.Application;
  */
 public class APP extends Application {
     public static APP instance;
+    public static String TOKEN = "";
 
     @Override
     public void onCreate() {
@@ -19,4 +20,7 @@ public class APP extends Application {
         return instance;
     }
 
+    public static String getTOKEN() {
+        return TOKEN;
+    }
 }

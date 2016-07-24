@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.nio.charset.Charset;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,6 +42,8 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 public class RetrofitClient {
     private static RetrofitClient instance;
     private Retrofit retrofit;
+    private static final MediaType MEDIA_TYPE = MediaType.parse("application/json; charset=UTF-8");
+    private static final Charset UTF_8 = Charset.forName("UTF-8");
 
     private RetrofitClient() {
 
@@ -51,17 +54,17 @@ public class RetrofitClient {
             public Response intercept(Chain chain) throws IOException {
                 Request originalRequest = chain.request();
                 String strBody = originalRequest.body().toString();
-                Log.i("CID", "request_contentType:" + originalRequest.body().contentType());
-                RequestBody newBody = RequestBody.create(MediaType.parse("application/json; charset=UTF-8"), strBody);
+                Log.i("CID", "RequestBody：" + strBody);
+                RequestBody newBody = RequestBody.create(MEDIA_TYPE,
+                        strBody.getBytes(UTF_8));
                 Request.Builder requestBuilder = originalRequest.newBuilder()
-                        .addHeader("Content-Encoding", "UTF-8")
                         .method(originalRequest.method(), newBody);
                 Request request = requestBuilder.build();
                 return chain.proceed(request);
             }
         };
         //设置头
-        builder.addInterceptor(headerInterceptor);
+        //builder.addInterceptor(headerInterceptor);
 
         // Log信息拦截器
         HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();

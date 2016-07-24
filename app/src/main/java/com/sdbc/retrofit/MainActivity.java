@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +25,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "CID";
     @BindView(R.id.tv_content)
     TextView tvContent;
 
@@ -34,22 +38,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initRequest() {
-        Map<String, String> loginMap = new HashMap<>();
-        loginMap.put("mobile", "17686616852");
-        loginMap.put("pwd", "123456");
-        String mobile = "17686616852";
-        String pwd = "123456";
-        String sign = ParameterUtils.MD5("content=" + ParameterUtils.JsonConvert(loginMap));
+        Map<String, String> map = new HashMap<>();
+        //map.put("mobile", "17686616852");
+        map.put("buildkid", "k20160628111146DODB1e6F");
+        String sign = ParameterUtils.MD5("content=" + ParameterUtils.JsonConvert(map));
+        Log.i(TAG, "Map=>Json:" + ParameterUtils.JsonConvert(map));
         RetrofitClient
                 .getInstance()
                 .create(HttpService.class)
-                .login(sign, mobile, pwd)
+                .getDoors(sign, map)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<UserData>() {
                     @Override
                     public void onCompleted() {
-                        Log.d("CID", "success");
+                        Log.i(TAG, "success");
                     }
 
                     @Override

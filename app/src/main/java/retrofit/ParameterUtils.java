@@ -36,9 +36,15 @@ public class ParameterUtils {
         return md5StrBuff.toString().toLowerCase();
     }
 
-
+    /**
+     * Map 转 String Json
+     *
+     * @param map
+     * @return
+     */
     public static String JsonConvert(Map map) {
-        return gson.toJson(map);
+        String json = gson.toJson(map);
+        return json;
     }
 
 }
