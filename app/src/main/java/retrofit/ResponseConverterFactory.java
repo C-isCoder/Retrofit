@@ -8,8 +8,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonWriter;
-import com.sdbc.retrofit.AES;
-import com.sdbc.retrofit.APIConstant;
 
 import org.json.JSONObject;
 
@@ -19,8 +17,6 @@ import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -32,18 +28,18 @@ import retrofit2.Retrofit;
 /**
  * Created by iscod on 2016/6/22.
  */
-public class BaseConverterFactory extends Converter.Factory {
+public class ResponseConverterFactory extends Converter.Factory {
     private final Gson gson;
 
-    public static BaseConverterFactory create() {
+    public static ResponseConverterFactory create() {
         return create(new Gson());
     }
 
-    public static BaseConverterFactory create(Gson gson) {
-        return new BaseConverterFactory(gson);
+    public static ResponseConverterFactory create(Gson gson) {
+        return new ResponseConverterFactory(gson);
     }
 
-    private BaseConverterFactory(Gson gson) {
+    private ResponseConverterFactory(Gson gson) {
         if (gson == null) throw new NullPointerException("gson == null");
         this.gson = gson;
     }
@@ -53,7 +49,7 @@ public class BaseConverterFactory extends Converter.Factory {
                                                             Annotation[] annotations,
                                                             Retrofit retrofit) {
         TypeAdapter<?> adapter = gson.getAdapter(TypeToken.get(type));
-        return new BaseResponseBodyConverter<>(gson, adapter);//响应
+        return new BaseResponseBodyConverter<>(gson, adapter, type);//响应
     }
 
     @Override
@@ -86,53 +82,58 @@ public class BaseConverterFactory extends Converter.Factory {
             adapter.write(jsonWriter, value);
             jsonWriter.close();
             return RequestBody.create(MEDIA_TYPE, buffer.readByteString());
-//            String strValue = value.toString();
-//            Log.i("CID", "request中传递的json数据：" + strValue);
-//            return RequestBody.create(MEDIA_TYPE, strValue);
         }
     }
 
     public class BaseResponseBodyConverter<T> implements Converter<ResponseBody, T> {
         private final TypeAdapter<T> adapter;
         private Gson gson;
+        private Type type;//泛型，当服务器返回的数据为数组的时候回用到
 
-        public BaseResponseBodyConverter(Gson gson, TypeAdapter<T> adapter) {
+        public BaseResponseBodyConverter(Gson gson, TypeAdapter<T> adapter, Type type) {
             this.adapter = adapter;
             this.gson = gson;
+            this.type = type;
         }
 
         @Override
         public T convert(ResponseBody response) throws IOException {
             String strResponse = response.string();
-            Log.i("Http响应:", strResponse);
             if (TextUtils.isEmpty(strResponse)) {
                 throw new HttpException("请求服务器异常");
             }
+            Log.d("Request", "服务器响应:" + "············································" +
+                    "·························································");
+            Log.d("Request", "服务器返回:" + strResponse);
+            Log.d("Request", "请求结束:" + "==========================================" +
+                    "==========================================================");
             try {
                 JSONObject jb = new JSONObject(strResponse);
                 // 服务器状态
                 int service_state = jb.getInt("state");
-                if (service_state == 1) {
-                    // 接口状态
-                    int ret_state = jb.getJSONObject("res").getInt("code");
-                    if (ret_state == 40000) {
-                        //data 为null  直接返回
-                        if (jb.getJSONObject("res").isNull("data")) {
-                            throw new HttpException("请求服务器异常");
-                        } else {
-                            String parames = jb.getJSONObject("res").getJSONObject("data").toString();
-                            Log.i("Http响应：", "返回的Data实体：" + parames);
-                            return adapter.fromJson(parames);
-                        }
-                    } else if (ret_state == 30000) {
-                        throw new HttpException(jb.getJSONObject("res").getString("msg"));
-                    } else {
-                        // 接口异常
-                        throw new HttpException(jb.getJSONObject("res").getString("msg"));
-                    }
-                } else {
+                if (service_state != 1) {
                     // 服务器异常
                     throw new HttpException(jb.getString("msg"));
+                }
+                // 接口状态
+                int ret_state = jb.getJSONObject("res").getInt("code");
+                if (ret_state == 40000) {
+                    if (jb.getJSONObject("res").isNull("data")) {
+                        throw new HttpException("请求服务器异常");
+                    }
+                    String parameters = jb.getJSONObject("res").get("data").toString();
+                    if (parameters.startsWith("{")) {
+                        return adapter.fromJson(parameters);
+                    } else if (parameters.startsWith("[")) {
+                        return gson.fromJson(parameters, type);
+                    } else {
+                        throw new HttpException("请求数据异常");
+                    }
+                } else if (ret_state == 30000) {
+                    throw new HttpException(jb.getJSONObject("res").getString("msg"));
+                } else {
+                    // 接口异常
+                    throw new HttpException(jb.getJSONObject("res").getString("msg"));
                 }
             } catch (Exception e) {
                 throw new HttpException(e.getMessage());
@@ -141,5 +142,6 @@ public class BaseConverterFactory extends Converter.Factory {
             }
         }
     }
-
 }
+
+

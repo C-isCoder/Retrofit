@@ -15,11 +15,12 @@ public class ParameterUtils {
             .create();
 
     public static String MD5(String original) {
+        String content = "content=" + original;
         MessageDigest messageDigest = null;
         try {
             messageDigest = MessageDigest.getInstance("MD5");
             messageDigest.reset();
-            messageDigest.update(original.getBytes("UTF-8"));
+            messageDigest.update(content.getBytes("UTF-8"));
         } catch (Exception e) {
             return null;
         }
@@ -43,8 +44,8 @@ public class ParameterUtils {
      * @return
      */
     public static String JsonConvert(Map map) {
-        String json = gson.toJson(map);
-        return json;
+        String strJson = gson.toJson(map);
+        return strJson;
     }
 
 }
