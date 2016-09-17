@@ -25,4 +25,9 @@ public class UserData implements Serializable {
     public String villagekid;
     @Expose
     public String committeekid;
+
+    @Override
+    public String toString() {
+        return kid + ' ' + village + ' ' + villagekid + ' ' + committee + ' ' + committeekid + ' ' + station + ' ' + mobile + ' ' + token + "]";
+    }
 }

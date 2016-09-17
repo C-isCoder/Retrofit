@@ -19,6 +19,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import model.ImageData;
 import model.UserData;
+import okhttp3.Call;
+import okhttp3.ResponseBody;
+import retrofit.HttpResponse;
 import retrofit.HttpService;
 import retrofit.RetrofitClient;
 import rx.Subscriber;
@@ -53,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
                 .login(loginMap)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<UserData>() {
+                .subscribe(new Subscriber<HttpResponse<UserData>>() {
                     @Override
                     public void onCompleted() {
                         progressBar.setVisibility(View.INVISIBLE);
@@ -65,13 +68,15 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onNext(UserData userData) {
+                    public void onNext(HttpResponse<UserData> userData) {
                         progressBar.setVisibility(View.INVISIBLE);
-                        APP.setMkid(userData.kid);
-                        APP.setToken(userData.token);
-                        APP.setCommKid(userData.committeekid);
-                        APP.setVillageKid(userData.villagekid);
-                        getBanner();
+                        UserData user = userData.res.data;
+                        Log.d("CID",userData.toString());
+                        APP.setMkid(user.kid);
+                        APP.setToken(user.token);
+                        APP.setCommKid(user.committeekid);
+                        APP.setVillageKid(user.villagekid);
+                        //getBanner();
                     }
                 });
     }
@@ -96,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onError(Throwable e) {
                         Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.d("Request", "异常:", e);
                     }
 
                     @Override

@@ -20,7 +20,7 @@ public interface HttpService {
 
 
     @POST("member/memberLogin")
-    Observable<UserData> login(@Body Map<String, String> Parameters);
+    Observable<HttpResponse<UserData>> login(@Body Map<String, String> Parameters);
 
     @POST("village/findDoorsByBuild")
     Observable<List<UserData>> getDoors(@Body Map<String, String> Parameters);

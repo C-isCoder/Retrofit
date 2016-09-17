@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 apply plugin: 'android-apt'
-
+apply plugin: 'me.tatarka.retrolambda'
 android {
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
 
     defaultConfig {
         applicationId "com.sdbc.retrofit"
-        minSdkVersion 19
+        minSdkVersion 14
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
@@ -17,6 +17,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
@@ -30,7 +34,6 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.0.0'
     compile 'com.squareup.okhttp3:okhttp-urlconnection:3.2.0'
     compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
-    compile 'com.squareup.retrofit2:converter-scalars'
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'com.squareup.okhttp3:logging-interceptor:3.3.1'
     compile 'com.squareup.retrofit2:converter-scalars:2.1.0'
