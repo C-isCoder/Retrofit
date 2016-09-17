@@ -40,7 +40,7 @@ public class RetrofitClient {
         OkHttpClient client = builder.build();
         retrofit = new Retrofit.Builder()
                 .baseUrl(BaseUrl)
-                .addConverterFactory(ResponseConverterFactory.create(GsonConverterFactory.create()))
+                //.addConverterFactory(ResponseConverterFactory.create(GsonConverterFactory.create()))
                 .addConverterFactory(new YLApiErrorAwareConverterFactory(
                         new EmptyJsonLenientConverterFactory(GsonConverterFactory.create())))
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
